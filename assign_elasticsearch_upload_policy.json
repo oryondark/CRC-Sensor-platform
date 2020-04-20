@@ -1,0 +1,16 @@
+{
+  "sql":"SELECT * FROM '$aws/things/crc-gps-broker3/shadow/update/accepted'",
+  "ruleDisabled":false,
+  "awsIotSqlVersion": "2016-03-23",
+  "actions":[
+    {
+      "elasticsearch":{
+        "roleArn":"arn:aws:iam::219544823291:role/aws_iot_es",
+        "endpoint":"ELASTIC_SEARCH_ENDPOINT",
+        "index":"gps-sensor",
+        "type":"doc",
+        "id":"${newuuid()}"
+      }
+    }
+  ]
+}

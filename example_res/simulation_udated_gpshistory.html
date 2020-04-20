@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD6KrDBCKIIP9H-10mk6yGD5XhH4tGoSII&libraries=geometry,places"></script>
+  <body>
+    <div id="map-wrapper">
+      <div id="map"></div>
+    </div>
+    <div id="test" style="
+        width: 500px;
+        height: 500px;
+        background: #000000;
+        position: absolute;
+        top: 40px;
+        left: 40px;
+        opacity: 0.5;
+    "></div>
+    <ul id='places'></ul>
+    <script>
+      function calculate_deflaction(prev_geo, last_geo){
+        lat_a = parseFloat(prev_geo[0]);
+        lat_b = parseFloat(last_geo[0]);
+        long_a = parseFloat(prev_geo[1]);
+        long_b = parseFloat(last_geo[1]);
+
+        //console.log(lat_a, lat_b, long_a, long_b);
+        
+        // a = latitude
+        // b = longitude
+        degree = 113.3;
+        d_lat = (lat_a + lat_b) / (2 * 0.01745);
+        //console.log(d_lat);
+        dx = degree * Math.cos(d_lat) * (long_b - long_a);
+        dy = degree * (lat_b - lat_a);
+        //console.log(dx, dy);
+        distance = Math.sqrt((dx*dx) + (dy*dy));
+        distance = distance * 1000 // convert Kilometer to meter
+
+        //console.log(distance);
+      }
+    </script>
+    <script>
+      var map;
+      var service;
+      var infowindow;
+      placesMarkers = [];
+      queueOldMarkers = [];
+
+      // remove old markers all
+      function removeOldMarkersAll(){
+
+      }
+      // remove placesMarkers all
+      function removePlacesMarkersAll(){
+        for (var place of placesMarkers) {
+          place.setMap(null);
+        }
+      }
+      // bound marker which finded the spot on searching place.
+      function createPlacesMarkers(place) {
+        var placesList = document.getElementById('places');
+        var image = {
+          url: place.icon,
+          size: new google.maps.Size(71, 71),
+          origin: new google.maps.Point(0, 0),
+          anchor: new google.maps.Point(17, 34),
+          scaledSize: new google.maps.Size(25, 25)
+        };
+
+        var marker = new google.maps.Marker({
+          map: map,
+          icon: image,
+          title: place.name,
+          position: place.geometry.location
+        });
+        placesMarkers.push(marker);
+
+        var li = document.createElement('li');
+        li.textContent = place.name;
+        placesList.appendChild(li);
+        //bounds.extend(place.geometry.location);
+      }
+      
+      function place_test(testGPSList, map) {
+        //console.log(testGPSList)
+        var pyrmont = new google.maps.LatLng(testGPSList[0], testGPSList[1]);
+        var request = {
+          location: pyrmont,
+          radius: '2000',
+          type: ['restaurant']
+        };
+
+        service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(request, callback);
+      }
+
+      function callback(results, status) {
+        //console.log(results);
+        if (status == google.maps.places.PlacesServiceStatus.OK) {
+          for (var i = 0; i < results.length; i++) {
+            //console.log(results[i])
+            var place = results[i];
+            createPlacesMarkers(place);
+          }
+        }
+      }
+    </script>
+
+    <script>
+      function deflaction_test(testGPSList, map){
+        var latLng_test = new google.maps.LatLng(testGPSList[0],testGPSList[1]);
+        var marker_test = new google.maps.Marker({
+          position: latLng_test,
+          map: map
+        });
+
+      }
+    </script>
+    <script>
+      function driver_test(testGPSList, map){
+        // Driver code
+        placesNode = document.getElementById('places');
+        while ( placesNode.hasChildNodes() ){
+          placesNode.removeChild(placesNode.firstChild)
+        }
+        place_test(testGPSList, map);
+        deflaction_test(testGPSList, map);
+      }
+    </script>
+    <script>
+      function queue_op(queue, value){
+        if(queue.length != 2){
+          queue.push(value);  
+        } else if(queue.length ==2){
+          queue.shift();
+          queue.push(value);
+        }
+      }
+    </script>
+    <script>
+      function marker_parser(imgList, index){
+        var imgList = imgList.getElementsByTagName('div');
+        nodeList = imgList[0].childNodes[2].childNodes[0].childNodes[2].childNodes;
+        //console.log(nodeList)
+
+        //Tracking node list all.
+        //In this condition, we can get the postion to create marker of GPS.
+        //Therfore, A platform can to make vector visualization if you want to show direction vector.
+        //Please. Direction vector let to leverage of the Custom Image.
+        queue = []
+        for(i = 0; i < nodeList.length; i++){
+          if(nodeList[i].childNodes.length > 1){
+            queue_op(queue, [nodeList[i].style.left, nodeList[i].style.top]);
+          }
+        }
+      }
+    </script>
+    <script>
+      function direction_vector(){
+        var bounds = {
+          17: [[20969, 20970], [50657, 50658]],
+          18: [[41939, 41940], [101315, 101317]],
+          19: [[83878, 83881], [202631, 202634]],
+          20: [[167757, 167763], [405263, 405269]]
+        };
+
+        var imageMapType = new google.maps.ImageMapType({
+          getTileUrl: function(coord, zoom) {
+            //console.log(coord, zoom)
+            if (zoom < 17 || zoom > 20 ||
+                bounds[zoom][0][0] > coord.x || coord.x > bounds[zoom][0][1] ||
+                bounds[zoom][1][0] > coord.y || coord.y > bounds[zoom][1][1]) {
+              return null;
+            }
+
+            return ['./rsz_logo.png'].join('');
+          },
+          tileSize: new google.maps.Size(256, 256)
+        });
+
+        map.overlayMapTypes.push(imageMapType);
+      }
+    </script>
+    <script>
+      /* init map test */
+      var map;
+      test = document.getElementById('map');
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 15,
+          center: new google.maps.LatLng(38.0628, -97.9405),
+          mapTypeId: 'terrain'
+        });
+
+        // Create a <script> tag and set the USGS URL as the source.
+        var script = document.createElement('script');
+        // This example uses a local copy of the GeoJSON stored at
+        // http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojsonp
+        script.src = 'https://developers.google.com/maps/documentation/javascript/examples/json/earthquake_GeoJSONP.js';
+        document.getElementsByTagName('head')[0].appendChild(script);
+        //create_page();
+        //목표지점 : [38.0656, -97.9383]
+        var testGPSList = [
+                           [38.0628, -97.9405,0],
+                           [38.0631, -97.9405,5],
+                           [38.0634, -97.9405,10],
+                           [38.0637, -97.9405,15],
+                           [38.0637, -97.9402,20],
+                           [38.0637, -97.9399,25],
+                           [38.0641, -97.9399,30],
+                           [38.0642, -97.9396,35],
+                           [38.0643, -97.9391,40],
+                           [38.0647, -97.9391,45],
+                           [38.0649, -97.9391,50]
+                           ]
+        testGPSList.forEach((value, index) => setTimeout(function(){ //순차적으로 데이터를 로드하기 위한 비동기식 코드.
+          removePlacesMarkersAll();
+          driver_test(value, map);
+          //console.log(document.getElementById('map').getElementsByClassName('gm-style'))
+          marker_parser(document.getElementById('map').getElementsByClassName('gm-style')[0], index);
+        }, 2000 * index )
+        );
+      }
+      
+      //Recently, javascript updated a functional rule. so and i convert to sort() using function below.
+      //Why do i sort in javascript ? 
+      //It is reason that a dataset not sort by order over elasticsearch. i did not catch the problem.
+      function zulu_sort(a,b){
+        if(a._source.state.reported.data.zu_t == b._source.state.reported.data.zu_t){return 0} return a._source.state.reported.data.zu_t > b._source.state.reported.data.zu_t ? 1 : -1;
+      }
+      /*
+      function coordlist() {
+        var host = "https://search-crc-gps-data-on64bynosp6ijupf6stbbt4byu.ap-northeast-2.es.amazonaws.com/crc_gps2/_search";
+        var count_payload = {
+          "size": 0,
+          "aggs": {
+            "group_by_state":{
+              "terms":{
+                "field":"state.reported.data.user.hjkim"
+              }
+            }
+          }
+        };
+
+        $.ajax({
+          type:"POST",
+          url:host, 
+          data:JSON.stringify(count_payload),
+          contentType: "application/json",
+          dataType: "json",
+          error: function(data){
+            //console.log(data);
+          },
+          complete: function(data){
+            
+            var cnt = data.responseJSON.hits.total;
+            var query_payload = {
+              "size":cnt,
+              "query": {
+                "match_all": {}
+              }
+            }
+
+            $.ajax({
+              type:"POST",
+              url:host,
+              data:JSON.stringify(query_payload),
+              contentType: "application/json",
+              dataType: "json",
+              error: function(data){
+                //console.log(data);
+              },
+              complete: function(data){
+                console.log(data);
+                log = data.responseJSON.hits.hits;
+                //lat = log[0]._source.state.reported.data.latitude;
+                //long = log[0]._source.state.reported.data.longitude;
+                log.sort(zulu_sort);
+
+                zulu_buff = 0;
+                last_geo = [0, 0];
+                prev_geo = [0, 0];
+
+                for (var i = 0; i < log.length; i++) {
+                  var latitude = log[i]._source.state.reported.data.latitude;
+                  var longitude = log[i]._source.state.reported.data.longitude;
+                  var zulu_time = log[i]._source.state.reported.data.zu_t;
+
+
+                  // remove first character of the string.
+                  zulu_time = "1" + zulu_time;
+                  zulu_time = parseInt(zulu_time) + 90000; // KST = GMT + 9
+                  zulu_time = zulu_time.toString();
+                  zulu_time = zulu_time.substring(1)
+
+                  console.log(latitude, longitude, zulu_time);
+                  
+                  var latLng = new google.maps.LatLng(latitude,longitude);
+                  var marker = new google.maps.Marker({
+                    position: latLng,
+                    map: map
+                  });
+
+                  
+                  if ((zulu_time - zulu_buff) > 5) {
+                    prev_geo = [last_geo[0], last_geo[1]];
+                    //calculate_deflaction(lat_prev, lat_buff, long_prev, long_prev);
+                    last_geo = [latitude, longitude];
+                    zulu_buff = zulu_time;
+                  };    
+                };
+                calculate_deflaction(prev_geo, last_geo);                
+              }
+            })
+          }
+        })
+      }
+      coordlist();
+      */
+      // 좌표정보를 배열로 저장하여 iteration 하기
+      /*
+      window.eqfeed_callback = function(results) {
+        for (var i = 0; i < results.features.length; i++) {
+          var coords = results.features[i].geometry.coordinates;
+          var latLng = new google.maps.LatLng(coords[1],coords[0]);
+          var marker = new google.maps.Marker({
+            position: latLng,
+            map: map
+          });
+        }
+      }
+      */
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD6KrDBCKIIP9H-10mk6yGD5XhH4tGoSII&&libraries=geometry,places,drawing&callback=initMap">
+    </script>
+  </body>
+</html>

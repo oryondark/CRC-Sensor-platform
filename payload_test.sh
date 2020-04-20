@@ -1,0 +1,1 @@
+curl -XPOST https://ElasticSearchCluster.ap-northeast-2.es.amazonaws.com/sencrc/_doc -d "{'GPS': '$GPGGA', 'timestamp': '002013', 'data': {'latitude': '...', 'longitude': '...'}}" -H 'Content-Type: application/json'

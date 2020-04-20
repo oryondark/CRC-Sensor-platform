@@ -1,0 +1,11 @@
+{
+	"sql":"SELECT * FROM '$aws/things/IoTCore/shadow/update/accepted'",
+	"ruleDisabled": false,
+	"awsIotSqlVersion" : "2016-03-23",
+	"actions": [{
+		"sns": {
+			"targetArn": "arn:aws:sns:ap-northeast-2:741926482963:state",
+			"roleArn": "arn:aws:iam::741926482963:role/service-role/sns_iot_topic"
+		}
+	}]
+}

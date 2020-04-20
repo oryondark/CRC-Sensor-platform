@@ -1,0 +1,108 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script>
+      function eventTime_sort(a,b){
+        if(a._source.metadata.reported.data.rate.timestamp == b._source.metadata.reported.data.rate.timestamp){return 0} return a._source.metadata.reported.data.rate.timestamp > b._source.metadata.reported.data.rate.timestamp ? 1 : -1;
+      }
+    </script>
+    <script>
+      // Convert to UTC Time.
+      function tsTokts(timestamp){
+        time = new Date(timestamp);
+        return time
+      }
+
+      function coordlist() {
+        var host = "https://search-crc-gps-data-on64bynosp6ijupf6stbbt4byu.ap-northeast-2.es.amazonaws.com/crc_hrm/_search";
+        var count_payload = {
+          "size": 0,
+          "aggs": {
+            "group_by_state":{
+              "terms":{
+                "field":"state.reported.sensor.oxhrm"
+              }
+            }
+          }
+        };
+
+        $.ajax({
+          type:"POST",
+          url:host, 
+          data:JSON.stringify(count_payload),
+          contentType: "application/json",
+          dataType: "json",
+          error: function(data){
+            //console.log(data);
+          },
+          complete: function(data){
+            
+            var cnt = data.responseJSON.hits.total;
+            var query_payload = {
+              "size":cnt,
+              "query": {
+                "match_all": {}
+              }
+            }
+
+            $.ajax({
+              type:"POST",
+              url:host,
+              data:JSON.stringify(query_payload),
+              contentType: "application/json",
+              dataType: "json",
+              error: function(data){
+                //console.log(data);
+              },
+              complete: function(data){
+                var hits = data.responseJSON.hits.hits;
+                hits.sort(eventTime_sort); // sort!!
+
+                getter = []
+                for (var line of hits){
+                  ts = line._source.metadata.reported.data.rate.timestamp;
+                  time = tsTokts(ts);
+                  rate = line._source.state.reported.data.rate;
+                  ox = line._source.state.reported.data.concen;
+                  streamed_data = [ time.getDate() + "-" + time.getHours() + "_" + time.getMinutes(), 
+                  parseInt(rate), parseInt(ox)]
+                  getter.push(streamed_data);
+                }
+                drawChart(getter)
+              }
+            })
+          }
+        })
+      }
+    </script>
+    <script type="text/javascript">
+      function drawChart(data) {
+        chart = [['Date', 'Rate', 'Concentration']]
+        for (var item of data){
+          chart.push(item);
+        }
+        console.log(chart)
+        var data = google.visualization.arrayToDataTable(chart);
+
+
+        var options = {
+          title: 'Company Performance',
+          curveType: 'function',
+          legend: { position: 'bottom' }
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+        chart.draw(data, options);
+      }
+    </script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(coordlist);
+    </script>
+  </head>
+  <body>
+    <div id="curve_chart" style="width: 900px; height: 500px"></div>
+  </body>
+</html>
