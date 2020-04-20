@@ -15,7 +15,7 @@
       }
 
       function coordlist() {
-        var host = "https://search-crc-gps-data-on64bynosp6ijupf6stbbt4byu.ap-northeast-2.es.amazonaws.com/crc_hrm/_search";
+        var host = "ElasticSearchEndpoint";
         var count_payload = {
           "size": 0,
           "aggs": {
@@ -29,7 +29,7 @@
 
         $.ajax({
           type:"POST",
-          url:host, 
+          url:host,
           data:JSON.stringify(count_payload),
           contentType: "application/json",
           dataType: "json",
@@ -37,7 +37,7 @@
             //console.log(data);
           },
           complete: function(data){
-            
+
             var cnt = data.responseJSON.hits.total;
             var query_payload = {
               "size":cnt,
@@ -65,7 +65,7 @@
                   time = tsTokts(ts);
                   rate = line._source.state.reported.data.rate;
                   ox = line._source.state.reported.data.concen;
-                  streamed_data = [ time.getDate() + "-" + time.getHours() + "_" + time.getMinutes(), 
+                  streamed_data = [ time.getDate() + "-" + time.getHours() + "_" + time.getMinutes(),
                   parseInt(rate), parseInt(ox)]
                   getter.push(streamed_data);
                 }

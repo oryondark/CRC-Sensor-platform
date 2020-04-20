@@ -2,7 +2,7 @@ import requests
 import json
 import os, sys
 from payloads import *
-ELASTIC_SEARCH_ENDPOINT = 'https://search-crc-elasticsearch1-wblxy43mkg3u2e67aybornoqtq.ap-northeast-2.es.amazonaws.com/crcgps/'
+ELASTIC_SEARCH_ENDPOINT = 'https://elasticsearch_endpoint.ap-northeast-2.es.amazonaws.com/crcgps/'
 
 def all_query(size):
 	payloads = read_all(size)
