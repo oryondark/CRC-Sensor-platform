@@ -1,11 +1,11 @@
 # Best Practice: IoT Environment with ElasticSearch Service on AWS
 
 ### Create Your ES Service
-'''sh
+```sh
 aws es create-elasticsearch-domain --domain-name $ElasticSearch_Domain \
 --elasticsearch-version $ES_VERSION --elasticsearch-cluster-config  InstanceType=$TYPE,InstanceCount=$PROVISIONING \
 --ebs-options EBSEnabled=true,VolumeType=standard,VolumeSize=15 --access-policies '{json form}'
-'''
+```
 
 you can start run using shell script 'setup_es.sh', however, you should set variables configuration values.<br>
 
