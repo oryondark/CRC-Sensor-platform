@@ -1,0 +1,24 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": [
+        "es:ESHttpGet",
+        "es:ESHttpPost"
+      ],
+      "Resource": "arn:aws:es:ap-northeast-2:accountNumber:domain/esDomainName/*"
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::accountNumber:root"
+      },
+      "Action": "es:ESHttpDelete",
+      "Resource": "arn:aws:es:ap-northeast-2:accountNumber:domain/esDomainName/*"
+    }
+  ]
+}
