@@ -145,7 +145,7 @@ void loop() {
     // restart
     count = 0;
 
-    // You must deallocate memory because Arduino not easy operate some of the garbege collection.
+    // You must deallocate memory because Arduino not easy operate some of the garbage collection.
     features = nullptr;
     delete [] data;
     data = new float[504];
