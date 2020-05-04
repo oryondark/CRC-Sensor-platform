@@ -14,8 +14,6 @@
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 
-//#include "common.h"
-
 // sensor device header
 #include <Arduino_LSM9DS1.h>
 // load model and unit test
@@ -79,28 +77,35 @@ int count = 0;
 //int sub_batch_num_size = 84 * 6;
 //float data[84][6];
 float * data = new float[504];
-float out_v;
 int bytes_size = input_tensor->bytes / sizeof(float);
+float output_0;
+float output_1;
+float output_2;
 
 void loop() {
-  /*
-      layer = 4
-      [
-       [ 0, 1, 2, 3],
-       [ 4, 5, 6, 7],
-       [ 8, 9, 10, 11],
-       ...
-       [N-3, N-2, N-1, N]
-      ]
-      = (1, N / layer, 4).
-       for exam, layer is 4, (1, 4, 4) in python runtime.
 
-       However, Arduino using CPP runtime, you should be flatten your matrix to bytes array form.
-       for exam, layer is 4 then 1 * 4 * 4 , then you can calculate 16 atomics.
-       so, you have to build a bytes array on 1-line array, the tf-lite model automated matching point of each dimensional.
+  //char sub_batchs[119];
+
+  /*
+  input data summary:
+
+  data[0] = sensing_1
+  data[2] = sensing_2
+  data[3] = sensing_3
+  ...
+  data[5] = sensing_6
+  ==> data = [sensing_1, .. , sensing_6]
+
+  ...
+  ...
+  tf_lite_input batchs;
+  for i in range(119):
+    batchs.append(data)
   */
+
   float acc_x, acc_y, acc_z;
   float gyr_x, gyr_y, gyr_z;
+
   int pos = count * 6;
 
   if (IMU.accelerationAvailable()) {
@@ -109,20 +114,35 @@ void loop() {
   if (IMU.gyroscopeAvailable()) {
     IMU.readGyroscope(gyr_x, gyr_y, gyr_z); // Read Gyroscope values
   }
+
+  // modeling area.
   data[pos + 0] = acc_x;
   data[pos + 1] = acc_y;
   data[pos + 2] = acc_z;
   data[pos + 3] = gyr_x;
   data[pos + 4] = gyr_y;
   data[pos + 5] = gyr_z;
+
   if(count == 84){
-    Serial.println("Start invocation");
+    // Multi dimensional input
     float * features = data;
     for(int i=0 ; i < bytes_size ; i++){
       input_tensor->data.f[i] = features[i];
     }
+    // invocation
     interpreter->Invoke();
+    // Output one-hot encoded values
+    output_0 = output_tensor->data.f[0];
+    output_1 = output_tensor->data.f[1];
+    output_2 = output_tensor->data.f[2];
     Serial.println("Success Invocation");
+    Serial.print(output_0);
+    Serial.print(",");
+    Serial.print(output_1);
+    Serial.print(",");
+    Serial.println(output_2);
+
+    // restart
     count = 0;
 
     // You must allocate memory because Arduino not easy operate some of the garbege collection.
@@ -130,9 +150,6 @@ void loop() {
     delete [] data;
     data = new float[504];
   }
-  Serial.print("Increase count num : ");
   count++;
-  Serial.println(count);
-  delay(300);
-
+  //delay(300);
 }
