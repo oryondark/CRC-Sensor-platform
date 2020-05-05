@@ -4,8 +4,8 @@
 [GPS project](https://github.com/oryondark/CRC-Sensor-platform/tree/master/track_gps)<br>
 [Oximetry](https://github.com/oryondark/CRC-Sensor-platform/tree/master/oxyhrmMonitor)<br>
 
-#### 2. Sensor platform with ElastiCache
-[ElastiCache Guide](https://github.com/oryondark/CRC-Sensor-platform/tree/master/centrallized_platform)<br>
+#### 2. Sensor platform with ElasticSearch
+[ElastiSearch Guide](https://github.com/oryondark/CRC-Sensor-platform/tree/master/centrallized_platform)<br>
 
 #### 3. Machine Learning Example using Arduino NANO 33 BLE SENSE
 a. Punch/Flex Example but i just use dataset only. so deep learning model did not provide.<br>
