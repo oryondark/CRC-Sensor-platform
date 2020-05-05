@@ -6,7 +6,8 @@ So we can't provide our project core to you.
 import tensorflow as tf
 
 # load from the trained model using keras.
-m = tf.keras.models.load_model('keras_tiny_tf_v1.h5')
+with tf.device("/cpu:0"):
+    m = tf.keras.models.load_model('keras_tiny_tf_v1.h5')
 m.summary()
 
 # predict

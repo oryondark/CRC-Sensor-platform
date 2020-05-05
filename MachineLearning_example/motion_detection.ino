@@ -1,7 +1,7 @@
 /*
  * This project referenced Tensorflow Workshop with arduino.
- * If you want to take this code, you should be noticed to me and author.
- * Best regards!
+ * Reference Addr :
+ * https://medium.com/tensorflow/how-to-get-started-with-machine-learning-on-arduino-7daf95b4157
  */
 
 #include <TensorFlowLite.h>
@@ -49,9 +49,6 @@ const int sub_batch_group_size = 6;
 const char * labels[] = { "punch", "flex" };
 #define NUM_OF_LABELS (sizeof(labels) / sizeof(labels[0]));
 
-// load model
-
-
 // Initiated the device envrionment.
 void setup() {
   model = ::tflite::GetModel(crc_model);
@@ -68,16 +65,13 @@ void setup() {
   // set up in/output pointer.
   input_tensor = interpreter->input(0);
   output_tensor = interpreter->output(0);
-
-
 }
 
-int count = 0;
-// Runned your task code.
-//int sub_batch_num_size = 84 * 6;
-//float data[84][6];
 float * data = new float[504];
-int bytes_size = input_tensor->bytes / sizeof(float);
+const float accelerationThreshold = 2.5;
+const int numSamples = 84;
+int samplesRead = 0;
+
 float output_0;
 float output_1;
 float output_2;
@@ -106,50 +100,76 @@ void loop() {
   float acc_x, acc_y, acc_z;
   float gyr_x, gyr_y, gyr_z;
 
-  int pos = count * 6;
+  // Throw out for accelerator sensor data if not suitable data of prediction task.
+  while (samplesRead == numSamples) {
+    if (IMU.accelerationAvailable()) {
+      // read the acceleration data
+      IMU.readAcceleration(acc_x, acc_y, acc_z);
 
-  if (IMU.accelerationAvailable()) {
-    IMU.readAcceleration(acc_x, acc_y, acc_z); // Read Acceleration values
-  }
-  if (IMU.gyroscopeAvailable()) {
-    IMU.readGyroscope(gyr_x, gyr_y, gyr_z); // Read Gyroscope values
-  }
+      // sum up the absolutes
+      float aSum = fabs(acc_x) + fabs(acc_y) + fabs(acc_z);
 
-  // modeling area.
-  data[pos + 0] = acc_x;
-  data[pos + 1] = acc_y;
-  data[pos + 2] = acc_z;
-  data[pos + 3] = gyr_x;
-  data[pos + 4] = gyr_y;
-  data[pos + 5] = gyr_z;
-
-  if(count == 84){
-    // Multi dimensional input
-    float * features = data;
-    for(int i=0 ; i < bytes_size ; i++){
-      input_tensor->data.f[i] = features[i];
+      // check if it's above the threshold
+      if (aSum >= accelerationThreshold) {
+        // reset the sample read count
+        samplesRead = 0;
+        break;
+      }
     }
-    // invocation
-    interpreter->Invoke();
-    // Output one-hot encoded values
-    output_0 = output_tensor->data.f[0];
-    output_1 = output_tensor->data.f[1];
-    output_2 = output_tensor->data.f[2];
-    Serial.println("Success Invocation");
-    Serial.print(output_0);
-    Serial.print(",");
-    Serial.print(output_1);
-    Serial.print(",");
-    Serial.println(output_2);
-
-    // restart
-    count = 0;
-
-    // You must deallocate memory because Arduino not easy operate some of the garbage collection.
-    features = nullptr;
-    delete [] data;
-    data = new float[504];
   }
-  count++;
-  //delay(300);
+
+  while (samplesRead < numSamples) {
+    int pos = samplesRead * 6;
+    if (IMU.accelerationAvailable()) {
+      IMU.readAcceleration(acc_x, acc_y, acc_z); // Read Acceleration values
+    }
+    if (IMU.gyroscopeAvailable()) {
+      IMU.readGyroscope(gyr_x, gyr_y, gyr_z); // Read Gyroscope values
+    }
+
+    // preprocess for sensing data.
+    data[pos + 0] = acc_x;
+    data[pos + 1] = acc_y;
+    data[pos + 2] = acc_z;
+    data[pos + 3] = gyr_x;
+    data[pos + 4] = gyr_y;
+    data[pos + 5] = gyr_z;;
+    samplesRead++;
+
+    if (samplesRead == numSamples) {
+      float * features = data;
+
+      for(int i=0 ; i < 504 ; i++){
+        input_tensor->data.f[i] = features[i];
+      }
+
+      interpreter->Invoke();
+
+      output_0 = output_tensor->data.f[0];
+      output_1 = output_tensor->data.f[1];
+      output_2 = output_tensor->data.f[2];
+      Serial.println("Success Invocation");
+      /*
+      // Print expected a probablilty output values.
+      Serial.print("[");
+      Serial.print(output_0);
+      Serial.print(",");
+      Serial.print(output_1);
+      Serial.print(",");
+      Serial.print(output_2);
+      Serial.println("]");
+      */
+      if(output_0 * 10 >= 7) {
+        Serial.println("Punch");
+      } else if( output_1 * 10 >= 7) {
+        Serial.println("Flex");
+      } else {
+        Serial.println("do not predict but act");
+      }
+
+      features = nullptr;
+      delete [] data;
+      data = new float[504];
+    }
+  }
 }
