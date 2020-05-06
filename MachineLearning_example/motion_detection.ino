@@ -164,7 +164,7 @@ void loop() {
       } else if( output_1 * 10 >= 7) {
         Serial.println("Flex");
       } else {
-        Serial.println("do not predict but act");
+        Serial.println("Can't Predict, but acted");
       }
 
       features = nullptr;
