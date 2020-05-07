@@ -2,9 +2,6 @@ import json
 
 #request_forecast()
 def req_forecast_test(lat, lon):
-    HTTP_URL = 'TEST_ENDPOINT'
-    print(HTTP_URL)
-
     dump = open('./test_dummy.json', 'r')
     dump = dump.read()
     return dump
@@ -28,3 +25,9 @@ def parse_climates_data(res):
     print("parse Keys : {}".format(res.keys()))
     print("so you should be parsed for 'list'.")
     print("type of climate data : {} and length : {}".format(type(res['list']), len(res['list'])))
+    print("picked data from listed climate : {} \nand keys : {}".format(res['list'][0], res['list'][0].keys()))
+
+    for i in range(int(res['cnt'])):
+        datetime = res['list'][i]['dt']
+        temperature = res['list'][i]['main']['temp']
+        print('{} : [ date: {} , temperature: {} ]'.format(i, datetime, temperature))
