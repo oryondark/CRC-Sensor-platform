@@ -1,10 +1,12 @@
 '''
 In this example, the ORM the sparksession read a qeury from json.
 '''
+from pyspark.conf import SparkConf
 from pyspark.sql import SparkSession
 
-#Initate SparkSession and Context
-conf = SparkConf().setAppName("crc-arduino-temp-rdd").setMaster("local[*]").setAll([('spark.executor.memory', '4g'),
+#Initate SparkSession Environments and Context
+conf = SparkConf().setMaster("local[*]").setAll([
+                         ('spark.executor.memory', '4g'),
                          ('spark.app.name', 'arduino-climate-rdd'),
                          ('spark.executor.cores', '4'),
                          ('spark.cores.max', '4'),
@@ -40,3 +42,28 @@ def convert_to_datetime(weather_json):
     dt_test = weather_df.select(weather_df['current']['dt']).collect()[0]['current.dt']
     real_time = datetime.fromtimestamp(int(dt_test)).strftime('%Y-%m-%d %H:%M:%S')
     print(real_time)
+
+class SparkORM_SetupTest():
+    def __init__(self):
+        self.appName = ('spark.app.name', 'setup_test')
+        self.executorMem = ('spark.executor.memory', '1g')
+        self.executorCore = ('spark.executor.cores', '1')
+        self.excutorCoreMax = ('spark.cores.max', '2')
+        self.driverMem = ('spark.driver.memory', '1g')
+        self.in_memory_compressed = ('spark.sql.inMemoryColumnarStorage.compressed', 'true')
+
+        self._spark_conf = self._configure()
+
+    def _configure(self):
+        conf = SparkConf().setMaster("local[*]").setAll([
+            self.appName,
+            self.executorMem,
+            self.executorCore,
+            self.excutorCoreMax,
+            self.driverMem,
+            self.in_memory_compressed
+        ])
+        return SparkSession.builder.config(conf=conf).getOrCreate()
+
+    def getContext(self):
+        return self._spark_conf
