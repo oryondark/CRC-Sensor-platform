@@ -4,13 +4,21 @@ import os
 OPENAPI_FORECAST = 'http://api.openweathermap.org/data/2.5/forecast?'
 OPENAPI_KEY = os.environ['OPENAPI_KEY']
 
-def request_forecast(lat, lon):
+#0 is default
+api_type = {
+    0 : 'http://api.openweathermap.org/data/2.5/forecast?',
+}
+
+def request_forecast(lat, lon, type=0):
+
+    OPENAPI_FORECAST = api_type[type]
+
     lat = "lat={}".format(lat)
     lon = "&lon={}".format(lon)
     appid = "&appid={}".format(OPENAPI_KEY)
+    
     # join the request path
     join = OPENAPI_FORECAST + lat + lon + appid
-
 
     res = rq.post(join)
     content = res.content

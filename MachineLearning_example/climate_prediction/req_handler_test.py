@@ -1,7 +1,7 @@
 import json
 
 #request_forecast()
-def req_forecast_test(lat, lon):
+def req_forecast_5days3hours(lat, lon):
     dump = open('./test_dummy.json', 'r')
     dump = dump.read()
     return dump
@@ -10,7 +10,7 @@ def handler_test(lat, lon):
     print("get latitude {} / longitude {}".format(lat, lon))
     print(" but this testcode will be used for dump data")
     print("request climate")
-    res = req_forecast_test(lat, lon)
+    res = req_forecast_5days3hours(lat, lon)
     print("responsed\n")
     print(res)
 
