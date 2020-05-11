@@ -28,3 +28,10 @@ def selecting_query(weather_json, column_name, column_name2, **kargs):
     if int(len(kargs)) > 0:
         for key, value in kargs.items():
             weather_df.select(weather_df[key][value]).show()
+
+def convert_to_datetime(weather_json):
+    weather_df = sc.parallelize(weather_json).map(lambda x: json.dumps(weather_json))
+    dt_test = weather_df.select(weather_df['current']['dt']).collect()[0]['current.dt']
+    real_time = datetime.fromtimestamp(int(dt_test)).strftime('%Y-%m-%d %H:%M:%S')
+    print(real_time)
+    
