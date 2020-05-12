@@ -67,3 +67,12 @@ class SparkORM_SetupTest():
 
     def getContext(self):
         return self._spark_conf
+
+    def inner_function(self):
+        def _inner_test_1():
+            print('hahahahah')
+        def _inner_test_2():
+            print('hjkim is a man of handsome.')
+
+        _inner_test_1()
+        _inner_test_2()
