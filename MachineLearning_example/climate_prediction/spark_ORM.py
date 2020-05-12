@@ -70,7 +70,7 @@ class SparkORM(object):
             key_2 = kargs.pop(k_list[1])
             del k_list # Remove the overwirting data.
             result = _sequential_iter(key_1, key_2)
-        else:
+        elif int(len(kargs)) < 2:
             result = _query_error()
 
         return result
