@@ -9,6 +9,9 @@ import os, sys
 # As Spark Session, We choose SQL method to access our solver.
 # It's class for Spark SQL to process Json type of climate.
 class SparkORM(object):
+    #Usage:
+    #spark = sparkORM.getSpark()
+    #spark_ctx = sparkORM.getContext()
     def __init__(self, appName, exmemSize, excoreNum, driveMem, inmemCompress):
         self.appName = ('spark.app.name', appName)
         self.executorMem = ('spark.executor.memory', exmemSize)
@@ -53,13 +56,13 @@ def read_RDD(weather_json, spark, context):
     #just return only dataframe
     return df
 
-def single_query_ORM(self, df, **kargs):
+def single_query_ORM(df, **kargs):
     '''
     kargs type is dictionary.
     This function only return to list( using collect func )
     '''
     def _sequential_iter(key_1, key_2):
-        v = df.select(weather_df['current']['dt']).collect()
+        v = df.select(df['current']['dt']).collect()
         return v
     def _query_error():
         return {"state" : "assembled query error"}
@@ -75,5 +78,5 @@ def single_query_ORM(self, df, **kargs):
         result = _query_error()
     return result
 
-def multiply_query_ORM(self):
+def multiply_query_ORM():
     raise "no impl."

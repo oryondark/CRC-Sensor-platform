@@ -76,3 +76,21 @@ class SparkORM_SetupTest():
 
         _inner_test_1()
         _inner_test_2()
+
+
+def spark_orm_test():
+    import json
+    from spark_ORM import *
+
+    weather_json = json.load(open("weather.json",'r'))
+    spark_setup = SparkORM(weather_json, 'setup_test', '1g', '2', '1g', 'true')
+
+    spark = spark_setup.getSpark()
+    spark_ctx = spark_setup.getContext()
+
+    read_RDD(weather_json, spark, spark_ctx)
+    '''
+    output:
+    DataFrame[]
+    '''
+    
