@@ -61,19 +61,18 @@ def single_query_ORM(df, **kargs):
     kargs type is dictionary.
     This function only return to list( using collect func )
     '''
+    result = None
     def _sequential_iter(key_1, key_2):
         v = df.select(df['current']['dt']).collect()
         return v
     def _query_error():
         return {"state" : "assembled query error"}
-
-    if int(len(kargs)) > 2:
+    if int(len(kargs)) >= 2:
         k_list = list(kargs.keys())
         key_1 = kargs.pop(k_list[0])
         key_2 = kargs.pop(k_list[1])
         del k_list # Remove the overwirting data.
         result = _sequential_iter(key_1, key_2)
-
     elif int(len(kargs)) < 2:
         result = _query_error()
     return result
