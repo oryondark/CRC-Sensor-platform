@@ -44,14 +44,14 @@ class SparkORM(object):
         '''
         return self._spark.sparkContext
 
-def read_RDD(weather_json, spark, context):
+def read_RDD(jsonObj, spark, context):
     '''
     Re construction from Json obejct.
     'parallelize' api is one of the RDD's functions.
     It is reconstruction from your iterable obejct or dictionary.
     And then that makes a collection from your distributed dataset on parallelized computation.
     '''
-    df = context.parallelize(weather_json).map(lambda x: json.dumps(weather_json)) # Transforms
+    df = context.parallelize(jsonObj).map(lambda x: json.dumps(jsonObj)) # Transforms
     df = spark.read.json(df) # Read the DataFrame copied form of Json.
     #just return only dataframe
     return df
@@ -63,7 +63,7 @@ def single_query_ORM(df, **kargs):
     '''
     result = None
     def _sequential_iter(key_1, key_2):
-        v = df.select(df['current']['dt']).collect()
+        v = df.select(df[key_1][key_2]).collect()[0]["{}.{}".format(key_1, key_2)]
         return v
     def _query_error():
         return {"state" : "assembled query error"}
