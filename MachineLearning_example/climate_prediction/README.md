@@ -55,8 +55,8 @@ So we had decide to use `Spark SQL`, that is to support functional programming u
 
 
 ### Visualization with django-chartjs
-[Chartjs reference](https://embed.plnkr.co/plunk/z3Qy9C)
-**Demo Figure**
+[Chartjs reference](https://embed.plnkr.co/plunk/z3Qy9C) <br>
+**Demo Figure** <br>
 ![Demo](./figures/sparkSQL_scenario_visDemo.png)
 
 
