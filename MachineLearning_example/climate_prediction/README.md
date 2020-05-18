@@ -46,14 +46,17 @@ you will be received like the below json data.
     }
 }
 ```
-
-### Note
-A weather detection area is not easy, because the weather is always effected from a variables such as windy, pressures, and disasters.<br>
-Therefore, we should be referenced some conference paper on recently. <br>
+### Using Spark SQL
+For our project, a temperature involved with variable other data in a climate, which is be represented form of JSON.<br>
+It means the climate data uniformed at always.<br>
+So we had decide to use `Spark SQL`, that is to support functional programming using MapReduce Processing.
 
 
 ### Visualization with django-chartjs
 [Chartjs reference](https://embed.plnkr.co/plunk/z3Qy9C)
+**Demo Figure**
+![Demo](./figures/sparkSQL_scenario_visDemo.png)
+
 
 
 ### progress......
