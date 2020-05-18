@@ -16,7 +16,8 @@ curl 'https://api.openweathermap.org/data/2.5/onecall?lat={latitude}&lon={logitu
 * `appid` is an API key of you. please let it get the key from [this](https://home.openweathermap.org/api_keys)
 <br>
 If you succeed for request, <br>
-you will be received like the below json data.
+you will be received like the below json data.<br>
+
 ```json
 {
     "lat": 60.99,
@@ -46,6 +47,7 @@ you will be received like the below json data.
     }
 }
 ```
+
 ### Using Spark SQL
 For our project, a temperature involved with variable other data in a climate, which is be represented form of JSON.<br>
 It means the climate data uniformed at always.<br>
