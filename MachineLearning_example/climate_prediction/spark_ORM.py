@@ -4,6 +4,7 @@ from pyspark.sql import SparkSession
 from datetime import datetime
 import json
 import os, sys
+import numpy as np
 
 
 # As Spark Session, We choose SQL method to access our solver.
@@ -55,6 +56,48 @@ def read_RDD(jsonObj, spark, context):
     df = spark.read.json(df) # Read the DataFrame copied form of Json.
     #just return only dataframe
     return df
+
+def spark_orm_domestic_temp(df):
+    temp_objs = df.select(df['기온']).collect()
+    for idx, obj in enumerate(temp_objs):
+        temp_objs[idx] = obj['기온']
+    return temp_objs
+
+def spark_orm_domestic_date(df):
+    time_objs = df.select(df['시:분']).collect()
+    for idx, obj in enumerate(time_objs):
+        time_objs[idx] = obj['시:분']
+    return time_objs
+
+def standardize(temps, times):
+    pivot = 0
+    date_set = []
+    temp_set = []
+
+    stack = []
+
+    time_cache = None
+    while temps:
+        time = times.pop(0)
+        temp = temps.pop(0)
+        if time_cache == None:
+            time_cache = time
+
+        if temp == ".":
+            continue
+
+        if time_cache != time:
+            if len(stack) != 0:
+                date_set.append(time)
+                temp_set.append(np.mean(stack, dtype=np.float16))
+                del stack
+                stack = []
+
+        time_cache = time
+        stack.append(float(temp))
+
+    return date_set, temp_set
+
 
 def single_query_ORM(df, **kargs):
     '''
