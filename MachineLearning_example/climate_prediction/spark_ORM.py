@@ -52,7 +52,7 @@ def read_RDD(jsonObj, spark, context):
     It is reconstruction from your iterable obejct or dictionary.
     And then that makes a collection from your distributed dataset on parallelized computation.
     '''
-    df = context.parallelize(jsonObj).map(lambda x: json.dumps(jsonObj)) # Transforms
+    df = context.parallelize(jsonObj).map(lambda x: json.dumps(x)) # Transforms
     df = spark.read.json(df) # Read the DataFrame copied form of Json.
     #just return only dataframe
     return df

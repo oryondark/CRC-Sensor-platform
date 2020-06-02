@@ -24,9 +24,9 @@ def make_dataframe(res):
     return weather_dt
 
 def to_datetime(col, date):
-    for idx, time in enumerate(times):
+    for idx, timeobj in enumerate(col):
         day = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d')
-        times[idx] = day + " " + timeobj["시:분"]
+        times[idx] = str(day) + " " + timeobj["시:분"]
     return times
 
 def to_daily_temp(col, temperature_list):
@@ -41,13 +41,12 @@ def handler(lat, lon, start_date, end_date):
     location_code = '108'
     term = '1'
     res = domestic_climate.get(date, term, location_code)
-    res = json.loads(res)
-
     weather_df = make_dataframe(res)
+
     temp_col = spark_orm_domestic_temp(weather_df)
     time_col = spark_orm_domestic_date(weather_df)
 
-    temp_col, date_set = standardize(temp_col, time_col)
+    date_set, temp_set = standardize(temp_col, time_col)
 
     return {"temp_date": to_datetime(date_set, date),
-            "temp_plot": temp_col}
+            "temp_plot": temp_set}
