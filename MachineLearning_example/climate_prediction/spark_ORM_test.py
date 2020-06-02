@@ -77,6 +77,43 @@ class SparkORM_SetupTest():
         _inner_test_2()
 
 
+def spark_orm_domestic_temp_test():
+    # get data from open URL
+    res = rq.post('https://www.weather.go.kr/cgi-bin/aws/nph-aws_txt_min_guide_test?202005221058&0&MINDB_1M&108&a&K')
+    content = res.content
+    print(content)
+
+    #create table data from HTML ( crawling )
+    table_data = [[cell.text for cell in row("td")] for row in BeautifulSoup(content)("tr")]
+    for td in table_data[1:]:
+        print(td)
+
+    weather_td = table_data[1:]
+    keys = weather_td[0]
+    datas = weather_td[1:]
+
+    weather_db = []
+    for data in datas:
+        i = 0
+        weather_res = {}
+        for key in keys:
+            if (i == 9) or (i == 11):
+                weather_res[key] = [data[i] , data[i+1]]
+                i += 1
+            else:
+                if data[i] == '시:분':
+                    weather_res[key] =
+                weather_res[key] = data[i]
+            weather_db.append(weather_res)
+            i += 1
+    print(len(weather_db))
+    print(json.dumps(weather_db))
+
+    # Submission job to spark SQL, then read using rdd
+    weather_df = sc.parallelize(weather_db).map(lambda x : json.dumps(x))
+    print(weather_df.select(weather_df['기온']).collect())
+
+
 def spark_orm_test():
     import json
     from spark_ORM import *

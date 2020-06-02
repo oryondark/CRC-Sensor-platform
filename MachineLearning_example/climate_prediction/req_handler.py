@@ -49,6 +49,5 @@ def handler(lat, lon, start_date, end_date):
 
     temp_col, date_set = standardize(temp_col, time_col)
 
-
     return {"temp_date": to_datetime(date_set, date),
             "temp_plot": temp_col}
