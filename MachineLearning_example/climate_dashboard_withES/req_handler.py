@@ -26,13 +26,30 @@ def make_dataframe(res):
 def to_datetime(col, date):
     for idx, timeobj in enumerate(col):
         day = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d')
-        times[idx] = str(day) + " " + timeobj["시:분"]
-    return times
+        col[idx] = str(day) + " " + timeobj["시:분"]
+    return col
 
 def to_daily_temp(col, temperature_list):
     for temp in col:
         temperature_list.append(kelvin_to_celsius(temp[0])) # index numer 0 is a daily temperature
     return temperature_list
+
+def oneday_handler(lat, lon, start_date, end_date):
+    #res = request_forecast(lat, lon)
+    #res = request_historical(lat, lon, )
+    date = '202005221058'
+    location_code = '108'
+    term = '1'
+    res = domestic_climate.get(date, term, location_code)
+    weather_df = make_dataframe(res)
+
+    temp_col = spark_orm_domestic_temp(weather_df)
+    time_col = spark_orm_domestic_date(weather_df)
+
+    date_set, temp_set = standardize(temp_col, time_col)
+
+    return {"temp_date": to_datetime(date_set, date),
+            "temp_plot": temp_set}
 
 def handler(lat, lon, start_date, end_date):
     #res = request_forecast(lat, lon)

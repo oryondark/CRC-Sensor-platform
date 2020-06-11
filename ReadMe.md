@@ -5,7 +5,8 @@
 [Oximetry](https://github.com/oryondark/CRC-Sensor-platform/tree/master/oxyhrmMonitor)<br>
 
 #### 2. Sensor platform with ElasticSearch
-[ElastiSearch Guide](https://github.com/oryondark/CRC-Sensor-platform/tree/master/centrallized_platform)<br>
+[ElastiSearch Guide](https://github.com/oryondark/CRC-Sensor-platform/tree/master/MachineLearning_example/climate_dashboard_withES)<br>
+[AWS IoT with ES Role](https://github.com/oryondark/CRC-Sensor-platform/tree/master/AWS_IoT_withES_RoleSetup)
 
 #### 3. Machine Learning Example using Arduino NANO 33 BLE SENSE
 a. Punch/Flex Example but i just use dataset only. so deep learning model did not provide.<br>
