@@ -1,61 +1,23 @@
-import requests as rq
-import json
-from django.db import models
-from django import forms
 
-ES_ENDPOINT = 'ENDPOINT' # Your Endpoint of ElasticSearch service
-
-def date_range_search_test(date_range):
+'''
+검색 날짜를 기준으로
+엘라스틱서치에서 gte는 크거나 같은 날
+lt는 그보다 낮은 날을 기준으로 검색함.
+타임존은 한국 시간에 맞춰야하므로 UTC +9
+'''
+def query_date_range_test(start_d, end_d):
     cmd = "_search"
     url = ES_ENDPOINT + cmd
     print(url)
-    headers = {'Content-Type': 'application/json'}
-    query = {"query":
-                {"range":
-                    {"date":
-                        {"gte":"now-3d/d", "lt":"now/d"}
-                    }
-                }
-            }
-
-    #you should be build json object query.
-    res = rq.get(url, data=json.dumps(query), headers=headers)
-    print(res.content)
-
-
-def query_date_range_test(ES_ENDPOINT):
-    cmd = "_search"
-    url = ES_ENDPOINT + cmd
-    print(url)
-
-    HOUR = [24 - i for i in range(0,24)]
-    HOUR.sort()
-
-    ## Time Generate
-    end = "2020-06-02 15:00:00"
-
-    start = None
-    ymd, hms = end.split(" ")
-    hms = hms.split(":")
-
-    hour_idx = HOUR.index(int(hms[0]))
-    hour_idx = hour_idx - 1
-    hour_idx = hour_idx%24
-
-    hms[0] = str(HOUR[hour_idx])
-    start_hms = "{}:{}:{}".format(hms[0], hms[1], hms[2])
-    start = ymd + " " + start_hms
-
-    ## Header & Parameter
     headers = {'Content-Type': 'application/json'}
     query = {
-        "size" : 1, #get only one data
+        "size" : 100,
         "query":{
             "range":{
-                "date":{"gte":start,
-                        "lt":end,
+                "date":{"gte":"2020-06-02 14:00:00",
+                        "lt":"2020-06-02 15:00:00",
                         "format": "yyyy-MM-dd HH:mm:ss",
-                        "time_zone": "+09:00" # UTC to Korea TimeZone
+                        "time_zone": "+09:00"
                        }
             },
         },
@@ -63,12 +25,29 @@ def query_date_range_test(ES_ENDPOINT):
     }
 
     res = rq.get(url, data=json.dumps(query), headers=headers)
-    print(res.content)
+    content = res.content
 
-#Django
-class es_template_test(model.Model):
+'''
+엘라스틱 서치 결과를 Json형태로 반환하고 읽기를 위한 검토 함수
+'''
+def read_json_from_ES(resp_content):
+    '''
+    import requests as rq
+    rs = rq.get('endpoint')
+    read_json_from_ES(rs)
+    '''
+    res = json.loads(jsonObj.content) # read cotent from responsed object
+    res = res['hits']['hits'][0]['_source'] # Default parsing form to read ES real data.
+    for k in res:
+        key = k
+        print(res[k])
+
+'''
+Class bon
+'''
+class es_template_test():
     def __init__(self):
-        self.ES_ENDPOINT = 'ENDPOINT'
+        self.ES_ENDPOINT = 'ElasticSearch ENDPOINT'
 
     def get_range(self, dates):
         cmd = "_search"
